@@ -3,6 +3,7 @@ package repository
 import (
 	"community-qa-platform/internal/models"
 	"database/sql"
+	"errors"
 )
 
 type UserRepo struct {
@@ -14,8 +15,8 @@ func NewUserRepo(db *sql.DB) *UserRepo {
 	return &UserRepo{db: db}
 }
 
-// CreateUserRepo 创建一个用户
-func (u *UserRepo) CreateUserRepo(user *models.User) error {
+// CreateUser 创建一个用户
+func (u *UserRepo) CreateUser(user *models.User) error {
 	sqlStr := `INSERT INTO users (username, password, email) VALUES (?, ?, ?)`
 
 	_, err := u.db.Exec(sqlStr, user.UserName, user.PassWord, user.Email)
@@ -26,8 +27,8 @@ func (u *UserRepo) CreateUserRepo(user *models.User) error {
 	return nil
 }
 
-// UpdateUserRepo 更新用户
-func (u *UserRepo) UpdateUserRepo(user *models.User) error {
+// UpdateUser 更新用户
+func (u *UserRepo) UpdateUser(user *models.User) error {
 	sqlStr := `UPDATE users SET username=?, password=?, email=? WHERE id=?`
 
 	_, err := u.db.Exec(sqlStr, user.UserName, user.PassWord, user.Email, user.ID)
@@ -38,8 +39,8 @@ func (u *UserRepo) UpdateUserRepo(user *models.User) error {
 	return nil
 }
 
-// GetUserRepo 根据ID获取用户
-func (u *UserRepo) GetUserRepo(id int64) (*models.User, error) {
+// GetUser 根据ID获取用户
+func (u *UserRepo) GetUser(id int64) (*models.User, error) {
 	sqlStr := `SELECT id, username, password, email FROM users WHERE id=?`
 
 	row := u.db.QueryRow(sqlStr, id)
@@ -47,7 +48,7 @@ func (u *UserRepo) GetUserRepo(id int64) (*models.User, error) {
 	user := &models.User{}
 	err := row.Scan(&user.ID, &user.UserName, &user.PassWord, &user.Email)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil // 用户不存在
 		}
 		return nil, err
@@ -56,8 +57,8 @@ func (u *UserRepo) GetUserRepo(id int64) (*models.User, error) {
 	return user, nil
 }
 
-// DeleteUserRepo 删除用户
-func (u *UserRepo) DeleteUserRepo(id int64) error {
+// DeleteUser 删除用户
+func (u *UserRepo) DeleteUser(id int64) error {
 	sqlStr := `DELETE FROM users WHERE id=?`
 
 	_, err := u.db.Exec(sqlStr, id)

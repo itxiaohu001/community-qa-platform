@@ -22,7 +22,7 @@ func TestCreateUserRepo(t *testing.T) {
 		PassWord: "fsafdasdf",
 		Email:    "test4@qq.com",
 	}
-	if err := repo.CreateUserRepo(user); err != nil {
+	if err := repo.CreateUser(user); err != nil {
 		t.Error(err)
 		return
 	}
