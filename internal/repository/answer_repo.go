@@ -18,26 +18,55 @@ func NewAnswerRepo(db *sql.DB) *AnswerRepo {
 
 // CreateAnswer 创建新的回答
 func (repo *AnswerRepo) CreateAnswer(answer *models.Answer) error {
-	// 实现创建回答的逻辑
-	// 使用 SQL 插入语句将回答存储到数据库中
+	sqlStr := `INSERT INTO answers (question_id, user_id, content) VALUES (?, ?, ?)`
+
+	_, err := repo.db.Exec(sqlStr, answer.QuestionID, answer.UserID, answer.Content)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // GetAnswerByID 根据ID获取回答
 func (repo *AnswerRepo) GetAnswerByID(id int64) (*models.Answer, error) {
-	// 实现根据ID获取回答的逻辑
-	return nil, nil
+	sqlStr := `SELECT id, question_id, user_id, content FROM answers WHERE id = ?`
+
+	row := repo.db.QueryRow(sqlStr, id)
+
+	answer := &models.Answer{}
+	err := row.Scan(&answer.ID, &answer.QuestionID, &answer.UserID, &answer.Content)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // 回答不存在
+		}
+		return nil, err
+	}
+
+	return answer, nil
 }
 
 // UpdateAnswer 更新回答
 func (repo *AnswerRepo) UpdateAnswer(answer *models.Answer) error {
-	// 实现更新回答的逻辑
+	sqlStr := `UPDATE answers SET question_id = ?, user_id = ?, content = ? WHERE id = ?`
+
+	_, err := repo.db.Exec(sqlStr, answer.QuestionID, answer.UserID, answer.Content, answer.ID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // DeleteAnswer 删除回答
 func (repo *AnswerRepo) DeleteAnswer(id int64) error {
-	// 实现删除回答的逻辑
+	sqlStr := `DELETE FROM answers WHERE id = ?`
+
+	_, err := repo.db.Exec(sqlStr, id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
