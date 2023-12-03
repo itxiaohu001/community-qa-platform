@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"community-qa-platform/internal/models"
+	"community-qa-platform/internal/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,20 +15,43 @@ type UserCredentials struct {
 	Password string `json:"password"`
 }
 
+type AuthHandler struct {
+	service *service.UserService
+}
+
+func NewAuthHandler(service *service.UserService) *AuthHandler {
+	return &AuthHandler{service: service}
+}
+
 // Register 处理用户注册的请求
-func Register(c *gin.Context) {
-	// 实现用户注册逻辑
-	// 例如：验证请求数据，创建用户记录等
+func (a *AuthHandler) Register(c *gin.Context) {
+	var newUser models.User
+
+	if err := c.BindJSON(&newUser); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := a.service.CreateUser(&newUser); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }
 
 // Login 处理用户登录的请求
-func Login(c *gin.Context) {
+func (a *AuthHandler) Login(c *gin.Context) {
 	var creds UserCredentials
 
 	// 将请求的JSON绑定到UserCredentials结构体
 	if err := c.BindJSON(&creds); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	if ok, err := a.service.CheckUserNamePassword(creds.Username, creds.Password); ok {
+
 	}
 
 	// 根据creds验证用户身份

@@ -17,10 +17,11 @@ func main() {
 	initProject()
 
 	answerService := service.NewAnswerService(repository.NewAnswerRepo(database.DB))
+	authService := service.NewUserService(repository.NewUserRepo(database.DB))
 
 	r := gin.Default()
 
-	setupRoutes(r, answerService)
+	setupRoutes(r, authService, answerService)
 
 	if err := r.Run(":8080"); err != nil {
 		panic(err)
@@ -34,13 +35,14 @@ func initProject() {
 }
 
 // setupRoutes 设置应用的路由
-func setupRoutes(router *gin.Engine, as *service.AnswerService) {
+func setupRoutes(router *gin.Engine, aus *service.UserService, as *service.AnswerService) {
 	router.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "欢迎来到社区问答平台")
 	})
 
-	router.POST("/register", handlers.Register)
-	router.POST("/login", handlers.Login)
+	authHandler := handlers.NewAuthHandler(aus)
+	router.POST("/register", authHandler.Register)
+	router.POST("/login", authHandler.Login)
 
 	api := router.Group("/api", handlers.JwtMiddleware(), middleware.Logger())
 

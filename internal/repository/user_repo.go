@@ -39,11 +39,28 @@ func (u *UserRepo) UpdateUser(user *models.User) error {
 	return nil
 }
 
-// GetUser 根据ID获取用户
-func (u *UserRepo) GetUser(id int64) (*models.User, error) {
+// GetUserByID 根据ID获取用户
+func (u *UserRepo) GetUserByID(id int64) (*models.User, error) {
 	sqlStr := `SELECT id, username, password, email FROM users WHERE id=?`
 
 	row := u.db.QueryRow(sqlStr, id)
+
+	user := &models.User{}
+	err := row.Scan(&user.ID, &user.UserName, &user.PassWord, &user.Email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil // 用户不存在
+		}
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (u *UserRepo) GetUserByName(name string) (*models.User, error) {
+	sqlStr := `SELECT id, username, password, email FROM users WHERE username=?`
+
+	row := u.db.QueryRow(sqlStr, name)
 
 	user := &models.User{}
 	err := row.Scan(&user.ID, &user.UserName, &user.PassWord, &user.Email)

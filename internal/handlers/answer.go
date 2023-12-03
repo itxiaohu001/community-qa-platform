@@ -35,7 +35,7 @@ func (h *AnswerHandler) CreateAnswer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, answer)
+	c.JSON(http.StatusCreated, gin.H{"message": "ok"})
 }
 
 // GetAnswer 处理获取单个回答的请求
@@ -56,5 +56,35 @@ func (h *AnswerHandler) GetAnswer(c *gin.Context) {
 }
 
 // UpdateAnswer 处理更新回答的请求
+func (h *AnswerHandler) UpdateAnswer(c *gin.Context) {
+	answer := new(models.Answer)
+	if err := c.BindJSON(answer); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的answer"})
+		return
+	}
+
+	if err := h.service.UpdateAnswer(answer); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, answer)
+}
+
 // DeleteAnswer 处理删除回答的请求
+func (h *AnswerHandler) DeleteAnswer(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的回答ID"})
+		return
+	}
+
+	if err := h.service.DeleteAnswer(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
+}
+
 // ... 其他函数
