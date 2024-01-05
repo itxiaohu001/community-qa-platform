@@ -1,0 +1,26 @@
+name: Build and Run Docker Container
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.21'
+
+    - name: Build
+      run: go build -o my-app ./cmd/server/main.go
+
+    - name: Build Docker image
+      run: |
+        docker build -t my-app-image .
+        docker run -d --name my-app-container my-app-image
+
