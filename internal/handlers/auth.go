@@ -3,6 +3,7 @@ package handlers
 import (
 	"community-qa-platform/internal/models"
 	"community-qa-platform/internal/service"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -51,7 +52,8 @@ func (a *AuthHandler) Login(c *gin.Context) {
 	}
 
 	if ok, err := a.service.CheckUserNamePassword(creds.Username, creds.Password); ok {
-
+		log.Print(err)
+		return
 	}
 
 	// 根据creds验证用户身份
